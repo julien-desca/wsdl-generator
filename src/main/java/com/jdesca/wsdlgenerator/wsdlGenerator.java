@@ -135,10 +135,10 @@ public class wsdlGenerator {
             soapBinding.setAttribute("style", "document");
             soapBinding.setAttribute("transport", "http://schemas.xmlsoap.org/soap/http");
             binding.appendChild(soapBinding);
-            
             for(Element wsdlOperation : bindingOperationsElement){
                 binding.appendChild(wsdlOperation);
             }
+            root.appendChild(binding);
 
             //wsdl:service tag
             Element service = doc.createElement("wsdl:service");
