@@ -11,11 +11,12 @@ public class WsdlPortType {
     private List<WsdlOperation> wsdlOperations;
 
     public WsdlPortType() {
+        super();
         this.wsdlOperations = new ArrayList<WsdlOperation>();
     }
 
     public WsdlPortType(String name) {
-        super();
+        this();
         this.name = name;
     }
 

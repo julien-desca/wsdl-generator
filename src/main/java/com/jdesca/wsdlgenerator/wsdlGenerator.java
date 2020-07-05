@@ -4,6 +4,7 @@ import com.jdesca.wsdlgenerator.entity.Operation;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlDefinition;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlMessage;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlOperation;
+import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlOperation_Binding;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlPart;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlPortType;
 import java.io.File;
@@ -95,6 +96,53 @@ public class wsdlGenerator {
                 portType.appendChild(operation);
             }
             root.appendChild(portType);
+            
+            Element wsdlBinding = doc.createElement("wsdl:binding");
+            wsdlBinding.setAttribute("name", definition.getWsdlBinding().getName());
+            wsdlBinding.setAttribute("type", "tns:".concat(definition.getServiceName()));
+            Element soapBinding = doc.createElement("soap:binding");
+            soapBinding.setAttribute("style", definition.getWsdlBinding().getSoapBinding().getStyle());
+            soapBinding.setAttribute("transport", definition.getWsdlBinding().getSoapBinding().getTransport());
+            wsdlBinding.appendChild(soapBinding);
+            
+            for(WsdlOperation_Binding op : definition.getWsdlBinding().getOperations()){
+                Element wsdloperation = doc.createElement("wsdl:operation");
+                wsdloperation.setAttribute("name",op.getName());
+                
+                Element soapOperation = doc.createElement("soap:operation");
+                soapOperation.setAttribute("soapAction", op.getSoapOperation().getSoapAction());
+                wsdloperation.appendChild(soapOperation);
+                
+                Element wsdlInput =doc.createElement("wsdl:input");
+                Element soapBody = doc.createElement("soap:body");
+                soapBody.setAttribute("use", "literal");
+                wsdlInput.appendChild(soapBody);
+                
+                Element wsdlOut =doc.createElement("wsdl:output");
+                Element soapBody2 = doc.createElement("soap:body");
+                soapBody2.setAttribute("use", "literal");
+                wsdlOut.appendChild(soapBody2);
+                
+                wsdloperation.appendChild(wsdlInput);
+                wsdloperation.appendChild(wsdlOut);
+                
+                wsdlBinding.appendChild(wsdloperation);
+            }
+            
+            root.appendChild(wsdlBinding);
+            
+            
+            //WSDL:SERVICE
+            Element wsdlService = doc.createElement("wsdl:service");
+            wsdlService.setAttribute("name", definition.getWsdlService().getName());
+            Element wsdlPort = doc.createElement("wsdl:port");
+            wsdlPort.setAttribute("binding", definition.getWsdlService().getWsdlPort().getBinding());
+            wsdlPort.setAttribute("name", definition.getWsdlService().getWsdlPort().getName());
+            Element wsdlAdress = doc.createElement("wsdl:address");
+            wsdlAdress.setAttribute("location", definition.getWsdlService().getWsdlPort().getAddress().getLocation());
+            wsdlPort.appendChild(wsdlAdress);
+            wsdlService.appendChild(wsdlPort);
+            root.appendChild(wsdlService);
             
             doc.appendChild(root);
 

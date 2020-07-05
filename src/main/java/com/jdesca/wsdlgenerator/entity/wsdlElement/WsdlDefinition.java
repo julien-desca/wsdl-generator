@@ -58,7 +58,9 @@ public class WsdlDefinition {
         this.serviceName = serviceName;
         
         this.wsdlMessage = new ArrayList<WsdlMessage>();
-        this.wsdlPortType = new WsdlPortType();
+        this.wsdlPortType = new WsdlPortType(serviceName);
+        this.wsdlBinding = new WsdlBinding(serviceName+"SOAP", "tns:"+serviceName);
+        this.wsdlService = new WsdlService(serviceName, wsdlBinding, targetNamespace);
     }
     
     public void addOperation(Operation operation){
@@ -76,6 +78,8 @@ public class WsdlDefinition {
         
         //add operation portType
         this.wsdlPortType.addOperation(operation, wsdlMessageIn, wsdlMessageOut, targetNamespace);
+        
+        this.wsdlBinding.addOperation(operation, targetNamespace);
     }
     
     
