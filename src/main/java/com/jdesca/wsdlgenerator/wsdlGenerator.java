@@ -6,7 +6,6 @@ import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlMessage;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlOperation;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlOperation_Binding;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlPart;
-import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlPortType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +17,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -81,22 +79,22 @@ public class wsdlGenerator {
                 }
                 root.appendChild(message);
             }
-            
+
             Element portType = doc.createElement("wsdl:portType");
             portType.setAttribute("name", definition.getWsdlPortType().getName());
-            for(WsdlOperation wsdlOp : definition.getWsdlPortType().getWsdlOperations()){
+            for (WsdlOperation wsdlOp : definition.getWsdlPortType().getWsdlOperations()) {
                 Element operation = doc.createElement("wsdl:operation");
                 operation.setAttribute("name", wsdlOp.getName());
                 Element input = doc.createElement("wsdl:input");
-                input.setAttribute("message", "tns:"+wsdlOp.getInput().getMessage());
+                input.setAttribute("message", "tns:" + wsdlOp.getInput().getMessage());
                 operation.appendChild(input);
                 Element output = doc.createElement("wsdl:output");
-                output.setAttribute("message", "tns:"+wsdlOp.getOutput().getMessage());
+                output.setAttribute("message", "tns:" + wsdlOp.getOutput().getMessage());
                 operation.appendChild(output);
                 portType.appendChild(operation);
             }
             root.appendChild(portType);
-            
+
             Element wsdlBinding = doc.createElement("wsdl:binding");
             wsdlBinding.setAttribute("name", definition.getWsdlBinding().getName());
             wsdlBinding.setAttribute("type", "tns:".concat(definition.getServiceName()));
@@ -104,34 +102,33 @@ public class wsdlGenerator {
             soapBinding.setAttribute("style", definition.getWsdlBinding().getSoapBinding().getStyle());
             soapBinding.setAttribute("transport", definition.getWsdlBinding().getSoapBinding().getTransport());
             wsdlBinding.appendChild(soapBinding);
-            
-            for(WsdlOperation_Binding op : definition.getWsdlBinding().getOperations()){
+
+            for (WsdlOperation_Binding op : definition.getWsdlBinding().getOperations()) {
                 Element wsdloperation = doc.createElement("wsdl:operation");
-                wsdloperation.setAttribute("name",op.getName());
-                
+                wsdloperation.setAttribute("name", op.getName());
+
                 Element soapOperation = doc.createElement("soap:operation");
                 soapOperation.setAttribute("soapAction", op.getSoapOperation().getSoapAction());
                 wsdloperation.appendChild(soapOperation);
-                
-                Element wsdlInput =doc.createElement("wsdl:input");
+
+                Element wsdlInput = doc.createElement("wsdl:input");
                 Element soapBody = doc.createElement("soap:body");
                 soapBody.setAttribute("use", "literal");
                 wsdlInput.appendChild(soapBody);
-                
-                Element wsdlOut =doc.createElement("wsdl:output");
+
+                Element wsdlOut = doc.createElement("wsdl:output");
                 Element soapBody2 = doc.createElement("soap:body");
                 soapBody2.setAttribute("use", "literal");
                 wsdlOut.appendChild(soapBody2);
-                
+
                 wsdloperation.appendChild(wsdlInput);
                 wsdloperation.appendChild(wsdlOut);
-                
+
                 wsdlBinding.appendChild(wsdloperation);
             }
-            
+
             root.appendChild(wsdlBinding);
-            
-            
+
             //WSDL:SERVICE
             Element wsdlService = doc.createElement("wsdl:service");
             wsdlService.setAttribute("name", definition.getWsdlService().getName());
@@ -143,13 +140,14 @@ public class wsdlGenerator {
             wsdlPort.appendChild(wsdlAdress);
             wsdlService.appendChild(wsdlPort);
             root.appendChild(wsdlService);
-            
+
             doc.appendChild(root);
 
             // write the content into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(fileName));
@@ -160,99 +158,4 @@ public class wsdlGenerator {
 
     }
 
-//            //add operationElements (messages, portType, binding)
-//            List<Element> operationsElements = new ArrayList<Element>();
-//            List<Element> bindingOperationsElement = new ArrayList<Element>();
-//            for (String operation : operations) {
-//                //portType operation
-//                Element portTypeOperation = doc.createElement("wsdl:operation");
-//                portTypeOperation.setAttribute("name", operation);
-//                
-//                Element input = doc.createElement("wsdl:input");
-//                input.setAttribute("message", "tns:"+messageIn.getAttribute("name"));
-//                portTypeOperation.appendChild(input);
-//                
-//                Element output = doc.createElement("wsdl:output");
-//                output.setAttribute("message", "tns:"+messageOut.getAttribute("name"));
-//                portTypeOperation.appendChild(output);
-//                
-//                operationsElements.add(portTypeOperation);
-//                
-//                //binding operation
-//                Element bindingOperation = doc.createElement("wsdl:operation");
-//                bindingOperation.setAttribute("name", operation);
-//                Element soapOpElement = doc.createElement("soap:operation");
-//                soapOpElement.setAttribute("soapAction", targetNamespace+"/"+operation);
-//                bindingOperation.appendChild(soapOpElement);
-//                
-//                Element inputElement = doc.createElement("wsdl:input");
-//                Element inputBody = doc.createElement("soap:body");
-//                inputBody.setAttribute("use", "literal");
-//                inputElement.appendChild(inputBody);
-//                
-//                Element outputElement = doc.createElement("wsdl:output");
-//                Element outputBody = doc.createElement("soap:body");
-//                outputBody.setAttribute("use", "literal");
-//                outputElement.appendChild(outputBody);
-//                bindingOperation.appendChild(inputElement);
-//                bindingOperation.appendChild(outputElement);
-//                
-//                bindingOperationsElement.add(bindingOperation);
-//            }
-//
-//            //add operation elements to root
-//            for (Element message : messagesElements) {
-//                root.appendChild(message);
-//            }
-//            
-//            //portType tag
-//            Element portType = doc.createElement("wsdl:portType");
-//            portType.setAttribute("name", serviceName);
-//            for(Element operation: operationsElements){
-//                portType.appendChild(operation);
-//            }
-//            root.appendChild(portType);
-//            
-//            //binding tag
-//            Element binding = doc.createElement("wsdl:binding");
-//            binding.setAttribute("name", serviceName+"SOAP");
-//            binding.setAttribute("type", "tns:"+serviceName);
-//            
-//            Element soapBinding = doc.createElement("soap:binding");
-//            soapBinding.setAttribute("style", "document");
-//            soapBinding.setAttribute("transport", "http://schemas.xmlsoap.org/soap/http");
-//            binding.appendChild(soapBinding);
-//            for(Element wsdlOperation : bindingOperationsElement){
-//                binding.appendChild(wsdlOperation);
-//            }
-//            root.appendChild(binding);
-//
-//            //wsdl:service tag
-//            Element service = doc.createElement("wsdl:service");
-//            service.setAttribute("name", serviceName);
-//            Element port = doc.createElement("wsdl:port");
-//            port.setAttribute("binding", "tns:"+serviceName+"SOAP");
-//            port.setAttribute("name", serviceName+"SOAP");
-//            Element address = doc.createElement("wsdl:address");
-//            address.setAttribute("location", "http://localhost:8080/"+ serviceName);
-//            port.appendChild(address);
-//            service.appendChild(port);
-//            root.appendChild(service);
-//            //append root to doc
-//            doc.appendChild(root);
-//            // write the content into xml file
-//            TransformerFactory transformerFactory = TransformerFactory.newInstance();
-//            Transformer transformer = transformerFactory.newTransformer();
-//            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-//            transformer.setOutputProperty(OutputKeys.INDENT, "yes");    
-//            DOMSource source = new DOMSource(doc);
-//            StreamResult result = new StreamResult(new File(serviceName.concat(".wsdl")));
-//            transformer.transform(source, result);
-//
-//            // Output to console for testing
-//            StreamResult consoleResult = new StreamResult(System.out);
-//            transformer.transform(source, consoleResult);
-//        } catch (Exception ex) {
-//            System.err.println(ex.getMessage());
-//        }
 }
