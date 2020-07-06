@@ -6,9 +6,8 @@ import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlMessage;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlOperation;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlOperation_Binding;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlPart;
+import com.jdesca.wsdlgenerator.entity.xsd.XsdImportedSchema;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -20,19 +19,48 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-public class wsdlGenerator {
+public class WsdlGenerator {
 
+    
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-
-        //get the service infos:
-        //get the namespace name
+        
         System.out.println("Service name: ");
         String serviceName = scanner.nextLine();
         System.out.println("Target namespace: ");
         String targetNamespace = scanner.nextLine();
-        WsdlDefinition def = new WsdlDefinition(targetNamespace, serviceName);
+        System.out.println("Endpoint location:");
+        String endpointlocation = scanner.nextLine();
+        //make targetNamespace ending with "/"
+        if(targetNamespace.charAt(targetNamespace.length()-1) != '/'){
+            targetNamespace = targetNamespace.concat("/");
+        }
+        WsdlDefinition def = new WsdlDefinition(targetNamespace, serviceName, endpointlocation);
+        
+        String response = promptMenu(scanner);
+        switch(response){
+            case "1":
+                break;
+            case "2":
+                XsdImportedSchema schema = new XsdImportedSchema();
+                System.out.println("Please enter the namespace (default:"+targetNamespace+"schema/)");
+                String schemaNamespace = scanner.nextLine();
+                schemaNamespace = schemaNamespace.trim().equals("") ? targetNamespace+"schema/" : schemaNamespace;
+                schema.setNamespace(schemaNamespace);
+                System.out.println("Please enter the path of your XSD file:");
+                String path = scanner.nextLine();
+                schema.setSchemaLocation(path);
+                def.setImportSchema(schema);
+                //parse file
+                //TODO
+                break;
+            default:
+                break;
+        }
+
+        //get the service infos:
+        //get the namespace name
         while (true) {
             System.out.println("Enter a new operation name:");
             String operationName = scanner.nextLine();
@@ -44,6 +72,23 @@ public class wsdlGenerator {
 
         toWSDL(def, def.getServiceName() + ".wsdl");
 
+    }
+
+    public static String promptMenu(Scanner scanner) {
+        while (true) {
+            System.out.println("Do you want to create the xsd schema or do you want to import an existing one?");
+            System.err.println("1. Create new XSD schema");
+            System.err.println("2. Import an existing XSD schema");
+            String Uresponse = scanner.nextLine();
+            switch (Uresponse) {
+                case "1":
+                case "2":
+                    return Uresponse;
+                default:
+                    System.out.println("Please choose one of the options bellow");
+                    break;
+            }
+        }
     }
 
     public static void toWSDL(WsdlDefinition definition, String fileName) {
@@ -61,13 +106,22 @@ public class wsdlGenerator {
             root.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
             root.setAttribute("xmlns:tns", definition.getTargetNamespace());
             root.setAttribute("targetNamespace", definition.getTargetNamespace());
+            if(definition.getImportSchema() != null){
+                root.setAttribute("xmlns:schema", definition.getImportSchema().getNamespace());
+            }
 
             //xs schema element
-            // @TODO
+            Element wsdlType = doc.createElement("wsdl:types");
             Element schema = doc.createElement("xs:schema");
-            root.appendChild(schema);
+            if(definition.getImportSchema() != null){
+                Element xsImport = doc.createElement("xs:import");
+                xsImport.setAttribute("namespace", definition.getImportSchema().getNamespace());
+                xsImport.setAttribute("schemaLocation", definition.getImportSchema().getSchemaLocation());
+                schema.appendChild(xsImport);
+            }
+            wsdlType.appendChild(schema);
+            root.appendChild(wsdlType);
 
-            List<Element> messagesElements = new ArrayList<Element>();
             for (WsdlMessage wsdlMessage : definition.getWsdlMessage()) {
                 Element message = doc.createElement("wsdl:message");
                 message.setAttribute("name", wsdlMessage.getName());
@@ -147,7 +201,7 @@ public class wsdlGenerator {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             DOMSource source = new DOMSource(doc);
             StreamResult result = new StreamResult(new File(fileName));

@@ -1,6 +1,7 @@
 package com.jdesca.wsdlgenerator.entity.wsdlElement;
 
 import com.jdesca.wsdlgenerator.entity.Operation;
+import com.jdesca.wsdlgenerator.entity.xsd.XsdImportedSchema;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +10,7 @@ public class WsdlDefinition {
     
     private String targetNamespace;
     private String serviceName;
+    private String endpointLocation;
     
     /*
      CHILD ELEMENTS
@@ -17,6 +19,7 @@ public class WsdlDefinition {
     private WsdlPortType wsdlPortType;
     private WsdlBinding wsdlBinding;
     private WsdlService wsdlService;
+    private XsdImportedSchema importSchema = null;
 
     public String getTargetNamespace() {
         return targetNamespace;
@@ -34,6 +37,16 @@ public class WsdlDefinition {
         this.serviceName = serviceName;
     }
 
+    public String getEndpointLocation() {
+        return endpointLocation;
+    }
+
+    public void setEndpointLocation(String endpointLocation) {
+        this.endpointLocation = endpointLocation;
+    }
+    
+    
+
     public List<WsdlMessage> getWsdlMessage() {
         return wsdlMessage;
     }
@@ -49,18 +62,25 @@ public class WsdlDefinition {
     public WsdlService getWsdlService() {
         return wsdlService;
     }
-    
-    
-    
 
-    public WsdlDefinition(String targetNamespace, String serviceName) {
+    public XsdImportedSchema getImportSchema() {
+        return importSchema;
+    }
+
+    public void setImportSchema(XsdImportedSchema importSchema) {
+        this.importSchema = importSchema;
+    }
+
+
+    public WsdlDefinition(String targetNamespace, String serviceName, String endpointlocation) {
+        this.endpointLocation = endpointlocation;
         this.targetNamespace = targetNamespace;
         this.serviceName = serviceName;
         
         this.wsdlMessage = new ArrayList<WsdlMessage>();
         this.wsdlPortType = new WsdlPortType(serviceName);
         this.wsdlBinding = new WsdlBinding(serviceName+"SOAP", "tns:"+serviceName);
-        this.wsdlService = new WsdlService(serviceName, wsdlBinding, targetNamespace);
+        this.wsdlService = new WsdlService(serviceName, wsdlBinding, this.endpointLocation);
     }
     
     public void addOperation(Operation operation){
