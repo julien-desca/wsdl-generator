@@ -87,11 +87,15 @@ public class WsdlDefinition {
         //generate request and response message
         WsdlMessage wsdlMessageIn = new WsdlMessage();
         wsdlMessageIn.setName(operation.getOperationName() + "Request");
-        wsdlMessageIn.getParts().add(new WsdlPart("parameterIn", ""));
+        for(int i = 0 ; i < operation.getInTypes().size() ; i++){
+            wsdlMessageIn.getParts().add(new WsdlPart("parameterIn"+i, operation.getInTypes().get(i)));
+        }
         
         WsdlMessage wsdlMessageOut = new WsdlMessage();
         wsdlMessageOut.setName(operation.getOperationName() + "Response");
-        wsdlMessageOut.getParts().add(new WsdlPart("parameterOut", ""));
+        for (int i = 0; i < operation.getOutTypes().size(); i++) {
+            wsdlMessageOut.getParts().add(new WsdlPart("parameterOut"+i, operation.getOutTypes().get(i)));
+        }
         
         this.wsdlMessage.add(wsdlMessageIn);
         this.wsdlMessage.add(wsdlMessageOut);
