@@ -1,14 +1,14 @@
 package com.jdesca.wsdlgenerator.entity.wsdlElement;
 
 
-public class WsdlAddress {
+public class SoapAddress {
     private String location;
 
-    public WsdlAddress(String location) {
+    public SoapAddress(String location) {
         this.location = location;
     }
 
-    public WsdlAddress() {
+    public SoapAddress() {
     }
 
     public String getLocation() {

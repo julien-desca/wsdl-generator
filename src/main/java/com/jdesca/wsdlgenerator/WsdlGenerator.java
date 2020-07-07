@@ -8,6 +8,8 @@ import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlOperation_Binding;
 import com.jdesca.wsdlgenerator.entity.wsdlElement.WsdlPart;
 import com.jdesca.wsdlgenerator.entity.xsd.XsdImportedSchema;
 import java.io.File;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -26,15 +28,18 @@ import org.w3c.dom.NodeList;
 public class WsdlGenerator {
 
     public static void main(String[] args) {
+        wsdlGeneration(System.in, System.out);
+    }
+
+    public static void wsdlGeneration(InputStream input, PrintStream output) {
         try {
 
-            Scanner scanner = new Scanner(System.in);
-
-            System.out.println("Service name: ");
+            Scanner scanner = new Scanner(input);
+            output.println("Service name: ");
             String serviceName = scanner.nextLine();
-            System.out.println("Target namespace: ");
+            output.println("Target namespace: ");
             String targetNamespace = scanner.nextLine();
-            System.out.println("Endpoint location:");
+            output.println("Endpoint location:");
             String endpointlocation = scanner.nextLine();
             //make targetNamespace ending with "/"
             if (targetNamespace.charAt(targetNamespace.length() - 1) != '/') {
@@ -43,18 +48,18 @@ public class WsdlGenerator {
             WsdlDefinition def = new WsdlDefinition(targetNamespace, serviceName, endpointlocation);
 
             List<String> types = new ArrayList<>();
-            
-            String response = promptMenuXSD(scanner);
+
+            String response = promptMenuXSD(scanner, output);
             switch (response) {
                 case "1":
                     break;
                 case "2":
                     XsdImportedSchema schema = new XsdImportedSchema();
-                    System.out.println("Please enter the namespace (default:" + targetNamespace + "schema/)");
+                    output.println("Please enter the namespace (default:" + targetNamespace + "schema/)");
                     String schemaNamespace = scanner.nextLine();
                     schemaNamespace = schemaNamespace.trim().equals("") ? targetNamespace + "schema/" : schemaNamespace;
                     schema.setNamespace(schemaNamespace);
-                    System.out.println("Please enter the path of your XSD file:");
+                    output.println("Please enter the path of your XSD file:");
                     String path = scanner.nextLine();
                     schema.setSchemaLocation(path);
                     def.setImportSchema(schema);
@@ -81,7 +86,7 @@ public class WsdlGenerator {
                         if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
                             Element eElement = (Element) nNode;
-                            if(eElement.getTagName().equals(prefix.concat(":element"))){
+                            if (eElement.getTagName().equals(prefix.concat(":element"))) {
                                 types.add(eElement.getAttribute("name"));
                             }
 
@@ -92,25 +97,26 @@ public class WsdlGenerator {
                 default:
                     break;
             }
-            
+
             while (true) {
-                System.out.println("Enter a new operation name:");
+                output.println("Enter a new operation name:");
                 String operationName = scanner.nextLine();
                 if (operationName.equals("")) {
                     break;
                 }
                 Operation operation = new Operation(operationName);
-                while(true){
-                    System.out.println("add a type for the input (empty to go to output type:");
+                while (true) {
+                    output.println("add a type for the input (empty to go to output type:");
                     String opType = scanner.nextLine();
-                    if(opType.trim().equals("")){
+                    if (opType.trim().equals("")) {
                         break;
                     }
                     operation.getInTypes().add(opType);
-                }while(true){
-                    System.out.println("add a type for the input (empty to go to new operation:");
+                }
+                while (true) {
+                    output.println("add a type for the input (empty to go to new operation:");
                     String opType = scanner.nextLine();
-                    if(opType.trim().equals("")){
+                    if (opType.trim().equals("")) {
                         break;
                     }
                     operation.getOutTypes().add(opType);
@@ -125,22 +131,21 @@ public class WsdlGenerator {
         }
     }
 
-    public static String promptMenuXSD(Scanner scanner) {
+    public static String promptMenuXSD(Scanner scanner, PrintStream output) {
         while (true) {
-            System.out.println("Do you want to create the xsd schema or do you want to import an existing one?");
-            System.err.println("1. Create new XSD schema");
-            System.err.println("2. Import an existing XSD schema");
+            output.println("Do you want to create the xsd schema or do you want to import an existing one?");
+            output.println("1. Create new XSD schema");
+            output.println("2. Import an existing XSD schema");
             String Uresponse = scanner.nextLine();
             switch (Uresponse) {
                 case "1":
                 case "2":
                     return Uresponse;
                 default:
-                    System.out.println("Please choose one of the options bellow");
+                    output.println("Please choose one of the options bellow");
                     break;
             }
         }
     }
-
 
 }

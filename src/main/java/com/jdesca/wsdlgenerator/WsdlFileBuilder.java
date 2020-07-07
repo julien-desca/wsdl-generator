@@ -31,6 +31,7 @@ abstract public class WsdlFileBuilder {
             root.setAttribute("name", definition.getServiceName());
             root.setAttribute("xmlns:wsdl", "http://schemas.xmlsoap.org/wsdl/");
             root.setAttribute("xmlns:xs", "http://www.w3.org/2001/XMLSchema");
+            root.setAttribute("xmlns:soap", "http://schemas.xmlsoap.org/wsdl/soap/");
             root.setAttribute("xmlns:tns", definition.getTargetNamespace());
             root.setAttribute("targetNamespace", definition.getTargetNamespace());
             if (definition.getImportSchema() != null) {
@@ -67,10 +68,10 @@ abstract public class WsdlFileBuilder {
                 Element operation = doc.createElement("wsdl:operation");
                 operation.setAttribute("name", wsdlOp.getName());
                 Element input = doc.createElement("wsdl:input");
-                input.setAttribute("message", "tns:" + wsdlOp.getInput().getMessage());
+                input.setAttribute("message",  wsdlOp.getInput().getMessage());
                 operation.appendChild(input);
                 Element output = doc.createElement("wsdl:output");
-                output.setAttribute("message", "tns:" + wsdlOp.getOutput().getMessage());
+                output.setAttribute("message",  wsdlOp.getOutput().getMessage());
                 operation.appendChild(output);
                 portType.appendChild(operation);
             }
@@ -116,7 +117,7 @@ abstract public class WsdlFileBuilder {
             Element wsdlPort = doc.createElement("wsdl:port");
             wsdlPort.setAttribute("binding", definition.getWsdlService().getWsdlPort().getBinding());
             wsdlPort.setAttribute("name", definition.getWsdlService().getWsdlPort().getName());
-            Element wsdlAdress = doc.createElement("wsdl:address");
+            Element wsdlAdress = doc.createElement("soap:address");
             wsdlAdress.setAttribute("location", definition.getWsdlService().getWsdlPort().getAddress().getLocation());
             wsdlPort.appendChild(wsdlAdress);
             wsdlService.appendChild(wsdlPort);

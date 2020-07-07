@@ -5,12 +5,12 @@ public class WsdlPort {
     String binding;
     String name;
     
-    WsdlAddress address;
+    SoapAddress address;
 
     public WsdlPort(WsdlBinding binding, String addresLocation) {
         this.name = binding.getName();
         this.binding = "tns:".concat(binding.getName());
-        this.address = new WsdlAddress(addresLocation);
+        this.address = new SoapAddress(addresLocation);
     }
 
     public String getBinding() {
@@ -21,7 +21,7 @@ public class WsdlPort {
         return name;
     }
 
-    public WsdlAddress getAddress() {
+    public SoapAddress getAddress() {
         return address;
     }
     
